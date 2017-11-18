@@ -18,7 +18,7 @@ except:
     import Queue as queue
     from Queue import Empty
 
-REMOTE_URL = 'https://requestb.in/wobde5wo'
+REMOTE_URL = 'http://localhost:5000/api/data';
 
 class Client(object):
     logger = logging.getLogger('stream-logger')
@@ -180,6 +180,7 @@ class Consumer(Thread):
         msg['timestamp'] = timestamp.isoformat()
         msg['messageId'] = str(uuid4())
         msg['value'] = ":::".join(batch)
+        msg['source'] = 'Serial'
         try:
             # post(self.write_key, self.host, batch=batch)
             self.logger.info("-------")
@@ -197,6 +198,7 @@ class Consumer(Thread):
             else:
                 self.logger.debug('non 2XX response')
                 self.logger.debug(r)
+                self.logger.debug(r.text)
         except:
             if attempt > self.retries:
                 raise
