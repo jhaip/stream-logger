@@ -17,6 +17,7 @@ try:
 except:
     import Queue as queue
     from Queue import Empty
+import serial
 
 REMOTE_URL = 'http://localhost:5000/api/data';
 
@@ -42,32 +43,14 @@ class Client(object):
 
     def open_stream(self):
         # Modifed source from https://stackoverflow.com/questions/11109859/pipe-output-from-shell-command-to-a-python-script
-        if not sys.stdin.isatty():
-            # use stdin if it's full
-            self.input_stream = sys.stdin
-        else:
-            # otherwise, read the given filename
-            try:
-                input_filename = sys.argv[1]
-            except IndexError:
-                message = 'need filename as first argument if stdin is not full'
-                raise IndexError(message)
-            else:
-                self.input_stream = open(input_filename, 'rU')
+        self.input_stream = serial.Serial('/dev/tty.usbserial-A800eIfy', 9600)
 
     def run(self):
-        inputEmptyCount = 0
         try:
             while True:
-                line = self.input_stream.readline()
+                line = unicode(self.input_stream.readline())
                 if line:
                     self.log(line)
-                    inputEmptyCount = 0
-                if not self.input_stream.isatty():
-                    inputEmptyCount += 1
-                    if inputEmptyCount > 2:
-                        self.logger.info("EMPTY COUNT")
-                        break
         except Exception as e:
             self.logger.error(e)
         finally:
